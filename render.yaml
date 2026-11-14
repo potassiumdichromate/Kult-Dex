@@ -1,0 +1,31 @@
+# Render Blueprint for the Kult Dex web game.
+#
+# NOTE: syncing this Blueprint CREATES A BILLABLE web service (starter plan).
+# Change `plan` to `free` for a free service (it sleeps when idle).
+#
+# The game calls AI Arena's /v1/dex API through this server (the gateway only
+# accepts browser calls from its own site) and turns Privy logins into AI
+# Arena tokens. dex-desk-service (aiarena-dex) must be deployed and the
+# gateway's DEX_SERVICE_URL set.
+
+services:
+  - type: web
+    name: kult-dex
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install --include=dev --no-audit --no-fund && npm run build
+    startCommand: node server.mjs
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "22.20.0"
+      - key: AI_ARENA_API_URL
+        value: https://aiarena-gateway.kult.games
+      - key: PRIVY_APP_ID
+        sync: false                     # the shared KULT Privy app (same as AI Arena)
+      - key: PRIVY_CLIENT_ID
+        sync: false                     # optional
+      - key: FRAME_ANCESTORS
+        value: "'self' https://world.kult.games"

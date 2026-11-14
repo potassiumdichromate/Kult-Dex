@@ -1,0 +1,100 @@
+/* Kult Dex additions on top of the shared office styles (styles.css). */
+:root { --up: #34d399; --down: #ff6b7d; --mono: "JetBrains Mono", ui-monospace, monospace; }
+#sidebar [data-view="office"] { --c: #22d3ee; }
+#sidebar [data-view="signals"] { --c: #f5c542; }
+#sidebar [data-view="markets"] { --c: #34d399; }
+#sidebar [data-view="talent"] { --c: #b58cff; }
+#sidebar [data-view="leaders"] { --c: #ffe08a; }
+#sidebar [data-view="verify"] { --c: #67e8f9; }
+#sidebar [data-view="desk"] { --c: #8fb6ff; }
+.logo { background: linear-gradient(135deg, #67e8f9, #22d3ee 50%, #f5c542) !important; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+.disclaimer { color: var(--muted); opacity: 0.8; border-top: 1px solid var(--line); padding-top: 10px; margin-top: 14px; }
+.notice.soft { border-color: var(--line-2); background: rgba(34, 211, 238, 0.06); color: var(--text); }
+#bankroll { color: #a5f3fc; border-color: rgba(34, 211, 238, 0.4); background: rgba(34, 211, 238, 0.07); font-variant-numeric: tabular-nums; }
+
+/* Direction, view and session pills */
+.dir { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font: 700 12px/1.6 var(--display); letter-spacing: 0.06em; border: 1px solid; vertical-align: middle; }
+.dir.long { color: var(--up); border-color: rgba(52, 211, 153, 0.55); background: rgba(52, 211, 153, 0.1); }
+.dir.short { color: var(--down); border-color: rgba(255, 107, 125, 0.55); background: rgba(255, 107, 125, 0.1); }
+.dir.flat { color: var(--muted); border-color: var(--line-2); }
+.dir.rotate { color: #ffe08a; border-color: rgba(255, 224, 138, 0.55); background: rgba(255, 224, 138, 0.08); }
+.view { display: inline-block; padding: 0 7px; border-radius: 6px; font: 700 10.5px/1.7 var(--display); letter-spacing: 0.06em; }
+.view.bullish { color: var(--up); background: rgba(52, 211, 153, 0.12); }
+.view.bearish { color: var(--down); background: rgba(255, 107, 125, 0.12); }
+.view.neutral { color: var(--muted); background: rgba(255, 255, 255, 0.06); }
+.view.veto { color: #fff; background: var(--down); }
+.sess { margin-left: 6px; padding: 0 6px; border-radius: 6px; font: 600 10px/1.7 var(--display); letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); }
+.sess.open { color: var(--up); border-color: rgba(52, 211, 153, 0.5); }
+.sess.weekend { color: #ffe08a; border-color: rgba(255, 224, 138, 0.45); }
+.status.open { color: #a5f3fc; border-color: rgba(103, 232, 249, 0.5); }
+.status.void { color: var(--muted); }
+.up { color: var(--up); } .down { color: var(--down); }
+
+/* The signal room */
+.sig-head { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 14px 16px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 18px;
+  background: radial-gradient(ellipse at 0% 0%, rgba(34, 211, 238, 0.18), transparent 60%), rgba(255, 255, 255, 0.04); }
+.sig-head .sym { font-size: 30px; line-height: 1; }
+.sig-call { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sig-px { margin-left: auto; text-align: right; }
+.sig-px .k { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.sig-px b { font: 700 20px var(--mono); }
+.ph.rules { display: grid; place-items: center; font: 700 13px var(--display); color: var(--accent); background: var(--well); border: 1px solid var(--line); }
+.scorebar { position: relative; height: 6px; margin: 6px 0 2px; border-radius: 999px; background: linear-gradient(90deg, rgba(255, 107, 125, 0.45), rgba(255, 255, 255, 0.08) 50%, rgba(52, 211, 153, 0.45)); }
+.scorebar i { position: absolute; top: -3px; left: calc(var(--x) - 6px); width: 12px; height: 12px; border-radius: 50%; background: #ecfeff; box-shadow: 0 0 10px rgba(236, 254, 255, 0.7); }
+.hashline { font-size: 11px; color: var(--muted); }
+canvas.chart { display: block; width: 100%; height: 280px; margin-top: 10px; border-radius: 12px; background: rgba(2, 10, 16, 0.55); border: 1px solid var(--line); }
+.chart-card { margin-bottom: 12px; }
+.room-grid > div { min-width: 0; }
+.seg { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+.ed-row.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.num-ed { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.num-ed > span:first-child { color: var(--muted); font-size: 13px; min-width: 44px; }
+.num-ed input { flex: 1; min-width: 0; max-width: 110px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--well); font-family: var(--mono); }
+@media (max-width: 1180px) { #signal-view .room-grid { grid-template-columns: 1fr; } }
+.risk-ed { display: flex; align-items: center; gap: 12px; }
+.risk-ed input[type="range"] { flex: 1; accent-color: var(--accent); }
+.risk-ed b { font-family: var(--mono); min-width: 56px; text-align: right; }
+.how { margin: 14px 0 0; padding-left: 20px; color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
+.timeline { list-style: none; margin: 4px 0 12px; padding: 0 0 0 18px; border-left: 2px solid var(--line); display: grid; gap: 14px; }
+.timeline li { position: relative; color: var(--muted); }
+.timeline li::before { content: ""; position: absolute; left: -25px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--line-2); }
+.timeline li.done { color: var(--text); }
+.timeline li.done::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.timeline li.live::before { border-color: var(--gold); animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(245, 197, 66, 0.15); } }
+
+/* Markets */
+.mk td { vertical-align: middle; }
+.mk tr.dim { opacity: 0.55; }
+.mk .num { font-family: var(--mono); }
+canvas.spark { display: block; }
+.stat .sub { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Verify */
+.verify-form { gap: 8px; margin: 6px 0 14px; }
+.verify-form input { flex: 1; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--well); font-family: var(--mono); }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.checks li { display: flex; gap: 12px; align-items: flex-start; }
+.checks .mark { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; }
+.checks li.ok .mark { background: rgba(52, 211, 153, 0.18); color: var(--up); }
+.checks li.bad .mark { background: rgba(255, 107, 125, 0.2); color: var(--down); }
+.checks li.na .mark { background: rgba(255, 255, 255, 0.06); color: var(--muted); }
+pre.json { max-height: 320px; overflow: auto; margin: 8px 0 0; padding: 12px; border-radius: 12px; background: rgba(2, 10, 16, 0.7); border: 1px solid var(--line); font: 12px/1.5 var(--mono); white-space: pre-wrap; word-break: break-all; }
+details.card > summary { cursor: pointer; font: 600 15px var(--display); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip.btnish { cursor: pointer; }
+.chip.btnish[aria-pressed="true"] { color: #021018; background: linear-gradient(135deg, var(--accent-3), var(--accent)); border-color: transparent; }
+.chip.btnish[aria-pressed="false"] { opacity: 0.75; }
+
+/* Desk */
+.mandate { display: grid; gap: 12px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.auto-row { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.cand .reads { color: var(--muted); margin: 4px 0 8px; }
+.ceo-pick .meta.style { font-style: italic; opacity: 0.85; }
+#console select { max-width: 260px; padding: 9px 10px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--well); }
+
+/* The demo is labelled as such everywhere. */
+body.is-demo::after { content: "DEMO · sample prices, nothing is real or anchored"; position: fixed; z-index: 30; left: 50%; top: 4px; transform: translateX(-50%); padding: 3px 12px; border-radius: 999px; font: 700 11px var(--display); letter-spacing: 0.08em; color: #021018; background: #f5c542; box-shadow: 0 0 18px rgba(245, 197, 66, 0.5); pointer-events: none; }
+@media (max-width: 860px) { .ed-row.two { grid-template-columns: 1fr; } .sig-px { margin-left: 0; text-align: left; } canvas.chart { height: 220px; } }

@@ -1,0 +1,22 @@
+{
+  "name": "kult-dex-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kult Dex web game: a 3D AI trading desk on AI Arena's /v1/dex API. Paper trading; every call is committed on 0G.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "build": "vite build --config privy-login/vite.config.js"
+  },
+  "devDependencies": {
+    "@privy-io/react-auth": "^3.35.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "viem": "^2.38.0",
+    "vite": "^7.3.1"
+  }
+}
