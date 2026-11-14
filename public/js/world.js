@@ -33,7 +33,7 @@ const hireTex = (hot) => canvasTex(256, 96, (g, W, H) => {
   g.shadowColor = "#22d3ee"; g.shadowBlur = hot ? 24 : 12;
   g.beginPath(); g.roundRect(6, 6, W - 12, H - 12, 40); g.fill(); g.stroke(); g.shadowBlur = 0;
   g.font = `700 44px ${FONT}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = hot ? "#021018" : "#bff6ff";
-  g.fillText("+ HIRE", W / 2, H / 2 + 2);
+  g.fillText(window.kultI18n ? window.kultI18n.t("+ HIRE") : "+ HIRE", W / 2, H / 2 + 2);
 });
 
 // A small candlestick chart, drawn deterministically from a seed (desk screens).
@@ -275,7 +275,7 @@ export class Office extends OfficeScene {
     const bg = s.createLinearGradient(0, 0, 0, CH); bg.addColorStop(0, "#04283a"); bg.addColorStop(1, "#020c13");
     s.fillStyle = bg; s.fillRect(0, 0, CW, CH);
     s.textBaseline = "top";
-    const text = (str, x, y, color, size = 6.5, weight = 600) => { s.font = `${weight} ${size}px ${FONT}`; s.fillStyle = color; s.fillText(String(str).toUpperCase(), x, y); };
+    const text = (str, x, y, color, size = 6.5, weight = 600) => { s.font = `${weight} ${size}px ${FONT}`; s.fillStyle = color; s.fillText(String(window.kultI18n ? window.kultI18n.t(String(str)) : str).toUpperCase(), x, y); };
     const fit = (str, n) => (str.length > n ? `${str.slice(0, n - 1)}.` : str);
     const blink = Math.floor(this.t * 1.5) % 2;
     if (S.mode === "work") {

@@ -15,6 +15,11 @@
 // closed what the step shows: go back), skip, enter, leave, round, pad,
 // guideBottom, last.
 
+// Words go through Kult Dex's i18n.js (English / 中文). Nova's line is typed
+// out in the chosen language, so the typing element is left alone by the page
+// translator (data-no-i18n).
+const T = (s) => (window.kultI18n ? window.kultI18n.t(s) : s);
+
 const ARROW = '<svg viewBox="0 0 48 60" aria-hidden="true"><path d="M17 2h14v30h13L24 58 4 32h13z" /></svg>';
 
 /**
@@ -30,11 +35,11 @@ export function createTour(opts) {
   const shades = ["t", "l", "r", "b"].map((s) => { const n = mk("div", `tour-shade ${s}`); n.addEventListener("click", nudge); return n; });
   const cover = mk("div", "tour-cover"); cover.addEventListener("click", nudge);
   const arrow = mk("div", "tour-arrow"); arrow.innerHTML = ARROW;
-  const text = mk("p", "tour-text"); text.addEventListener("click", () => finishTyping());
+  const text = mk("p", "tour-text"); text.dataset.noI18n = ""; text.addEventListener("click", () => finishTyping());
   const count = mk("span", "tour-count");
   const title = mk("b");
   const next = mk("button", "btn primary small tour-next", { type: "button" }); next.addEventListener("click", () => advance());
-  const skip = mk("button", "tour-skip", { type: "button", textContent: "Skip tutorial" }); skip.addEventListener("click", () => stop(true));
+  const skip = mk("button", "tour-skip", { type: "button", textContent: T("Skip tutorial") }); skip.addEventListener("click", () => stop(true));
   const face = mk("div", "tour-face");
   face.append(mk("img", "", { src: opts.guide.img, alt: "" }), mk("span", "tour-name", { textContent: opts.guide.name }));
   const top = mk("div", "tour-top"); top.append(title, count);
@@ -66,14 +71,14 @@ export function createTour(opts) {
     if (step.skip?.()) return advance();
     enteredAt = performance.now(); doneAt = 0; scrolled = false; lastR = null;
     root.className = `tour${step.target ? "" : " center"}`;
-    title.textContent = step.title || "Nova, your guide";
+    title.textContent = T(step.title || "Nova, your guide");
     const phase = steps.filter((s) => s.phase === step.phase);
     count.textContent = `${phase.indexOf(step) + 1} / ${phase.length}`;
-    next.hidden = !step.next; next.textContent = step.nextLabel || "Next";
+    next.hidden = !step.next; next.textContent = T(step.nextLabel || "Next");
     skip.hidden = Boolean(step.last);
     guide.classList.remove("in"); void guide.offsetWidth; guide.classList.add("in");
     step.enter?.();
-    type(lines[step.id] || "");
+    type(T(lines[step.id] || ""));
   }
   function advance() {
     if (!step) return;
@@ -174,6 +179,14 @@ export function createTour(opts) {
   }
   const set = (n, k, v) => { if (n[k] !== v) n[k] = v; };
   const setClass = (n, c, on) => { if (n.classList.contains(c) !== on) n.classList.toggle(c, on); };
+
+  // The language changed: re-word the open step at once.
+  window.kultI18n?.onLang(() => {
+    skip.textContent = T("Skip tutorial");
+    if (!step) return;
+    title.textContent = T(step.title || "Nova, your guide"); next.textContent = T(step.nextLabel || "Next");
+    clearInterval(typing); full = T(lines[step.id] || ""); text.textContent = full;
+  });
 
   addEventListener("keydown", (e) => {
     if (!step || root.classList.contains("quiet")) return;
