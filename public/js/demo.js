@@ -55,7 +55,7 @@ export function createDemoApi({ fresh = false } = {}) {
     return {
       ...desk, level, desks: 2 + level, nextLevelAt: level === 1 ? 50 : 150, staff: desk.staff,
       payroll: { weeklyTotal: desk.staff.reduce((a, s) => a + s.weeklySalary, 0), nextDueAt: iso(Date.now() + 3 * 864e5) },
-      stats: { week: st, all: st }, standings: { weekly: st ? { rank: null, points: desk.points, settled: st.settled, ranked: false, needed: Math.max(0, 30 - st.settled) } : null, allTime: null, rwa: null },
+      stats: { week: st, all: st }, standings: { weekly: st ? { points: desk.points, settled: st.settled, trades: st.settled, avgR: st.avgR ?? 0, avgRLow: null, avgRHigh: null, brier: null, maxDrawdown: 0 } : null, allTime: null, rwa: null },
       openSignals: signals.filter((s) => s.status === "LOCKED" || s.status === "OPEN").length, drafts: signals.filter((s) => s.status === "DRAFT").length,
       lockedToday: signals.filter((s) => s.lockedAt).length, dailyLockCap: 12, scanReadyAt: desk.lastScanAt ? iso(desk.lastScanAt + 20e3) : null, week: "demo"
     };
@@ -165,13 +165,13 @@ export function createDemoApi({ fresh = false } = {}) {
       if (!s) throw err(404, "No committed signal with that id");
       return {
         signal: { ...s }, desk: { name: desk.name, ceoName: desk.ceo.name }, payload: { demo: true, note: "Demo calls are hashed locally and never anchored.", id: s.id, asset: s.asset, direction: s.direction },
-        leafHash: s.leafHash, recomputedLeaf: s.leafHash, leafMatches: true, batch: { id: 1, root: s.leafHash, status: "LOCAL", leafCount: batches.length }, proof: [], proofValid: true, onChainMatches: null, anchoredBeforeEntry: null,
+        leafHash: s.leafHash, recomputedLeaf: s.leafHash, leafMatches: true, batch: { id: 1, root: s.leafHash, status: "LOCAL", leafCount: batches.length }, proof: [], proofValid: true, onChainMatches: null, anchoredBeforeEntry: null, chainValid: true, environment: "LOCAL", policy: null, label: "Simulated paper performance, not executable profit",
         chain: { prev: s.prevHash ? { id: signals.find((x) => x.leafHash === s.prevHash)?.id } : null, next: signals.find((x) => x.prevHash === s.leafHash) ? { id: signals.find((x) => x.prevHash === s.leafHash).id } : null },
         settlement: s.status === "SETTLED" ? { demo: true, exit: { reason: s.exitReason, price: s.exitPrice } } : null,
         howTo: ["This is the demo: nothing here is anchored. In the real game every call is a leaf in a Merkle batch anchored on 0G Chain."]
       };
     },
-    async leaderboard(kind) { return { kind, period: "demo", minRanked: 30, ranked: [], provisional: desk ? [{ rank: null, deskId: desk.id, deskName: desk.name, ceo: { name: desk.ceo.name, clan: desk.ceo.clan }, points: desk.points, settled: signals.filter((s) => s.status === "SETTLED").length, trades: 0, hitRate: null, avgR: 0, maxDrawdown: 0, brier: null, me: true }] : [] }; },
+    async leaderboard(kind) { const settled = signals.filter((x) => x.status === "SETTLED"); return { kind, period: "demo", ranking: false, records: desk && settled.length ? [{ deskId: desk.id, deskName: desk.name, ceo: { name: desk.ceo.name, clan: desk.ceo.clan }, settled: settled.length, trades: settled.length, abstentions: 0, hitRate: null, avgR: settled.reduce((a, x) => a + (x.r || 0), 0) / settled.length, avgRLow: null, avgRHigh: null, maxDrawdown: 0, brier: null, me: true }] : [] }; },
     async assets() { return { assets: ASSETS.map((a) => ({ ...a, classLabel: CLASS_LABEL[a.class], session: a.hours === "us-equities" ? usSession() : { status: "open", label: "Trades 24/7" }, signalOnly: true })) }; },
     async market() {
       return {

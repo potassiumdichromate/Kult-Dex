@@ -150,8 +150,9 @@ function draftEditor(s, ctx) {
     el("ol", { class: "how" },
       el("li", {}, "Lock hashes the whole call (asset, direction, sizes, every read) into a leaf and chains it to your last one."),
       el("li", {}, "Within a minute the leaf goes into a Merkle batch anchored on 0G Chain."),
-      el("li", {}, "Entry is the average price over 5 minutes, starting 5 minutes after you lock: after the commitment."),
-      el("li", {}, "It settles at its target, its stop or its horizon against real prices. Drafts are never scored.")));
+      el("li", {}, "Entry is the average price over 5 minutes, starting 5 minutes after you lock, and only if the call is confirmed on 0G first. Not confirmed in time: the call is void, never entered late."),
+      el("li", {}, "It settles at its target, its stop or its horizon, from the price source it locked. Drafts are never scored."),
+      el("li", {}, "Simulated paper performance, not executable profit.")));
   return card;
 }
 
@@ -167,7 +168,9 @@ function timeline(s, ctx) {
       step(s.status === "SETTLED" || s.status === "VOID", s.status === "VOID" ? "Void" : s.status === "SETTLED" ? `Settled ${fmtR(s.r)}` : "Open",
         s.status === "SETTLED" ? `${s.exitReason === "target" ? "Hit the target" : s.exitReason === "stop" ? "Stopped out" : "Closed at the horizon"}${s.exitPrice ? ` at ${fmtPrice(s.exitPrice)}` : ""} · ${fmtPctPoints(s.resultPct)} after costs${s.credits ? ` · +${s.credits} credits` : ""}${s.review ? " · flagged: feeds disagreed" : ""}`
           : s.status === "VOID" ? s.voidReason : s.endsAt ? el("span", {}, "Horizon ends in ", el("span", { "data-until": s.endsAt }, fmtCountdown(Date.parse(s.endsAt) - now))) : null, s.status === "OPEN")),
-    el("div", { class: "actions" }, el("button", { type: "button", class: "btn", onclick: () => ctx.verify(s.id) }, lineIcon("verify", "inline-ico"), "Verify this call")));
+    s.status === "SETTLED" ? el("p", { class: "muted small paper-label" }, "Simulated paper performance, not executable profit.") : null,
+    el("div", { class: "actions" }, el("button", { type: "button", class: "btn", onclick: () => ctx.verify(s.id) }, lineIcon("verify", "inline-ico"), "Verify this call"),
+      s.leafHash ? el("a", { class: "btn ghost", href: `/proof/${encodeURIComponent(s.id)}`, target: "_blank", rel: "noopener" }, "Public proof page ↗") : null));
 }
 
 // ---------------------------------------------------------------- markets
@@ -243,24 +246,26 @@ export function renderTalent(root, ctx) {
 export function renderLeaders(root, ctx) {
   const { state } = ctx, kind = state.lbKind || "weekly", data = state.leaderboards?.[kind];
   const mine = state.desk?.standings?.[kind === "weekly" ? "weekly" : kind === "rwa" ? "rwa" : "allTime"];
-  const table = (entries, ranked) => el("table", { class: "lb" },
-    el("thead", {}, el("tr", {}, el("th", {}, "#"), el("th", {}, "Desk"), el("th", { class: "num" }, "Points"), el("th", { class: "num" }, "Settled"), el("th", { class: "num hide-sm" }, "Hit rate"), el("th", { class: "num hide-sm" }, "Avg R"), el("th", { class: "num hide-sm" }, "Brier"))),
+  const band = (e) => (e.avgRLow == null || e.avgRHigh == null || e.settled < 2 ? "" : ` (${fmtR(e.avgRLow)} to ${fmtR(e.avgRHigh)})`);
+  const table = (entries) => el("table", { class: "lb records" },
+    el("thead", {}, el("tr", {}, el("th", {}, "Desk"), el("th", { class: "num" }, "Settled"), el("th", { class: "num" }, "Avg paper R"), el("th", { class: "num hide-sm" }, "Hit rate"), el("th", { class: "num hide-sm" }, "Brier"), el("th", { class: "num hide-sm" }, "Max drawdown"))),
     el("tbody", {}, entries.map((e) => el("tr", { class: e.me ? "me" : null },
-      el("td", { class: "rank" }, ranked ? e.rank : "·"),
       el("td", {}, el("div", { class: "ag" }, e.deskName, e.me ? " (you)" : ""), el("div", { class: "ceo" }, `CEO ${e.ceo?.name || "?"}`, clan(e.ceo?.clan))),
-      el("td", { class: "num" }, fmtPts(Math.round(e.points * 10) / 10)), el("td", { class: "num" }, e.settled),
-      el("td", { class: "num hide-sm" }, e.hitRate == null ? "—" : `${Math.round(e.hitRate * 100)}%`), el("td", { class: "num hide-sm" }, fmtR(e.avgR)), el("td", { class: "num hide-sm" }, e.brier == null ? "—" : e.brier.toFixed(3))))));
+      el("td", { class: "num" }, `${e.settled}`, e.abstentions ? el("div", { class: "muted small" }, `${e.abstentions} no-trade`) : null),
+      el("td", { class: "num" }, fmtR(e.avgR), el("div", { class: "muted small" }, band(e))),
+      el("td", { class: "num hide-sm" }, e.hitRate == null ? "—" : `${Math.round(e.hitRate * 100)}%`),
+      el("td", { class: "num hide-sm" }, e.brier == null ? "—" : e.brier.toFixed(3)),
+      el("td", { class: "num hide-sm" }, e.maxDrawdown == null ? "—" : `${(e.maxDrawdown * 100).toFixed(1)}%`)))));
   fill(root,
-    head(kind === "weekly" ? state.desk?.week || "This week" : kind === "rwa" ? "Real-world assets" : "Since launch", "Leaderboards",
-      tabs([["weekly", "Weekly"], ["all-time", "All time"], ["rwa", "RWA"]], kind, (k) => ctx.loadLeaders(k), "Leaderboard")),
+    head(kind === "weekly" ? state.desk?.week || "This week" : kind === "rwa" ? "Real-world assets" : "Since launch", "Desk records",
+      tabs([["weekly", "This week"], ["all-time", "All time"], ["rwa", "RWA"]], kind, (k) => ctx.loadLeaders(k), "Desk records")),
     el("div", { class: "stats" },
-      stat("Your rank", mine?.rank ? `#${mine.rank}` : "—", "var(--accent)", mine && !mine.ranked ? `${mine.needed} more settled to rank` : null),
-      stat("Your points", mine ? fmtPts(Math.round(mine.points * 10) / 10) : "0", "var(--gold)"),
-      stat("Desks ranked", data ? String(data.ranked.length) : "—", "#a5f3fc", data ? `${data.minRanked}+ settled calls to rank` : null)),
-    el("p", { class: "muted small" }, "Only settled calls count, losers and no-trades included. Points = 100 × average R × √settled, minus a drawdown penalty, plus a calibration bonus (Brier). Capped at 500 a week."),
-    section("Ranked", data ? `${data.minRanked}+ settled calls` : "",
-      !data ? el("p", { class: "muted" }, "Loading…") : !data.ranked.length ? el("p", { class: "empty-dash" }, "No desk has enough settled calls yet. Be the first.") : table(data.ranked, true)),
-    data?.provisional?.length ? section("Not ranked yet", `fewer than ${data.minRanked} settled calls`, table(data.provisional, false)) : null);
+      stat("Your settled calls", mine ? String(mine.settled) : "0", "var(--accent)"),
+      stat("Your avg paper R", mine ? fmtR(mine.avgR) : "—", "var(--gold)", mine && mine.avgRLow != null && mine.settled > 1 ? `${fmtR(mine.avgRLow)} to ${fmtR(mine.avgRHigh)}` : null),
+      stat("Your Brier", mine?.brier == null ? "—" : mine.brier.toFixed(3), "#a5f3fc", "calibration: lower is better")),
+    el("p", { class: "muted small" }, "Records, not a ranking. Each number stands on its own: average paper R with its 95% range, calibration (Brier), drawdown and how many calls settled, no-trades included. Desks choose different assets and times, so these are not a skill ranking. Simulated paper performance, not executable profit."),
+    section("Desks", data ? "most settled calls first" : "",
+      !data ? el("p", { class: "muted" }, "Loading…") : !data.records?.length ? el("p", { class: "empty-dash" }, "No desk has a settled call yet.") : table(data.records)));
 }
 
 // ---------------------------------------------------------------- verify
@@ -281,12 +286,27 @@ export function renderVerify(root, ctx) {
         el("ul", { class: "checks" },
           check(v.leafMatches, "The call is unchanged", el("span", {}, "keccak256 of its canonical JSON = ", el("code", {}, shortHash(v.recomputedLeaf)))),
           check(v.batch ? v.proofValid : null, v.batch ? `It is in batch #${v.batch.id}` : "Waiting for its batch", v.batch ? el("span", {}, "Merkle proof folds into root ", el("code", {}, shortHash(v.batch.root))) : "Batches run every minute"),
-          check(v.batch?.status === "ANCHORED" ? (v.onChainMatches ?? true) : null, v.batch?.status === "ANCHORED" ? "The root is on 0G Chain" : "Not anchored on-chain in this environment",
-            v.batch?.status === "ANCHORED" ? el("a", { href: v.batch.explorer, target: "_blank", rel: "noopener" }, `tx ${shortHash(v.batch.txHash)} ↗`) : v.batch ? "Batch kept LOCAL: its root and proofs verify, but nothing outside Kult vouches for its time yet." : null),
-          check(v.anchoredBeforeEntry, "Committed before its entry price", v.anchoredBeforeEntry == null ? "Known once the batch is anchored" : `anchored ${new Date(v.batch.anchoredAt).toLocaleTimeString()} · entry from ${new Date(v.signal.entryFrom).toLocaleTimeString()}`),
-          check(true, "Chained to the desk's other calls", el("span", {}, v.chain.prev ? el("a", { href: "#", onclick: (e) => { e.preventDefault(); ctx.verify(v.chain.prev.id); } }, "‹ previous") : "the desk's first call", " · ", v.chain.next ? el("a", { href: "#", onclick: (e) => { e.preventDefault(); ctx.verify(v.chain.next.id); } }, "next ›") : "latest call")))),
+          onChainCheck(v, check),
+          check(v.anchoredBeforeEntry, "Committed before its entry price", v.anchoredBeforeEntry == null
+            ? (v.environment === "LOCAL" ? "Not anchored in this environment" : "Unverified until 0G Chain confirms the time")
+            : `on 0G at ${new Date(v.batch.anchoredAt).toLocaleTimeString()} · entry from ${new Date(v.signal.entryFrom).toLocaleTimeString()}`),
+          check(v.chainValid ?? null, "Chained to the desk's other calls", el("span", {}, v.chain.prev ? el("a", { href: "#", onclick: (e) => { e.preventDefault(); ctx.verify(v.chain.prev.id); } }, "‹ previous") : "the desk's first call", " · ", v.chain.next ? el("a", { href: "#", onclick: (e) => { e.preventDefault(); ctx.verify(v.chain.next.id); } }, "next ›") : "latest call"))),
+        el("div", { class: "actions" },
+          el("a", { class: "btn", href: `/proof/${encodeURIComponent(v.signal.id)}`, target: "_blank", rel: "noopener" }, "Public proof page ↗"),
+          el("button", { type: "button", class: "btn ghost", onclick: async (e) => { try { await navigator.clipboard.writeText(`${location.origin}/proof/${encodeURIComponent(v.signal.id)}`); e.currentTarget.textContent = "Link copied"; } catch { /* no clipboard */ } } }, "Copy proof link"))),
+      v.signal.status === "VOID" ? el("div", { class: "card" }, el("h3", {}, "Void", el("small", {}, "no paper result")), el("p", {}, v.signal.voidReason || "Void"), el("p", { class: "muted small" }, "A void is logged in the desk's history. It has no P&L and does not count as a win or a loss.")) : null,
+      v.policy ? el("div", { class: "card" }, el("h3", {}, "Rules it was locked with", el("small", {}, v.policy.version)),
+        el("ul", { class: "rules" },
+          el("li", {}, el("b", {}, "Price source: "), v.policy.priceSource, " (never another feed after lock)"),
+          el("li", {}, el("b", {}, "Entry: "), v.policy.entry),
+          el("li", {}, el("b", {}, "Exit: "), v.policy.exit, v.policy.sameBar === "stop" ? ". Target and stop in the same bar: the stop." : ""),
+          el("li", {}, el("b", {}, "Costs: "), `${v.policy.costBps} bps, ${v.policy.costs.replace(/^costBps of the price, /, "")}`),
+          el("li", {}, el("b", {}, "Void when: "), v.policy.voids.join("; "))),
+        el("p", { class: "muted small" }, v.label || "Simulated paper performance, not executable profit.")) : null,
       v.signal.status === "SETTLED" ? el("div", { class: "card" }, el("h3", {}, "Settlement", el("small", {}, fmtR(v.signal.r))),
-        el("pre", { class: "json" }, JSON.stringify(v.settlement, null, 2))) : null,
+        settlementLines(v),
+        el("p", { class: "muted small" }, "Simulated paper performance, not executable profit."),
+        el("details", {}, el("summary", {}, "The full record, with every price it used"), el("pre", { class: "json" }, JSON.stringify(v.settlement, null, 2)))) : null,
       el("details", { class: "card" }, el("summary", {}, "The committed call (payload)"), el("pre", { class: "json" }, JSON.stringify(v.payload, null, 2))),
       v.proof ? el("details", { class: "card" }, el("summary", {}, "Merkle proof"), el("pre", { class: "json" }, JSON.stringify(v.proof, null, 2))) : null,
       el("div", { class: "card" }, el("h3", {}, "Check it yourself"), el("ol", { class: "how" }, v.howTo.map((h) => el("li", {}, h))))
@@ -363,4 +383,26 @@ export function renderAnalyst(root, a, ctx) {
     el("div", { class: "actions" },
       el("button", { type: "button", class: "btn danger", onclick: (e) => ctx.fire(a, e.currentTarget) }, "Let go"),
       el("button", { type: "button", class: "btn primary", onclick: () => ctx.closeSheet("analyst-sheet") }, "Back to work")));
+}
+
+// ---------------------------------------------------------------- verify helpers
+/** The on-chain check: green only when 0G Chain was read and holds the same root. */
+function onChainCheck(v, check) {
+  if (v.environment === "LOCAL") return check(null, "Not anchored: local or demo environment", "Nothing outside Kult vouches for this call, so it is never shown as anchored.");
+  if (v.batch?.status !== "ANCHORED") return check(null, v.batch ? "Not on 0G Chain yet" : "Waiting for its batch", v.batch ? "Its batch is waiting for its anchor." : "Batches run every minute");
+  const link = el("a", { href: v.batch.explorer, target: "_blank", rel: "noopener" }, `tx ${shortHash(v.batch.txHash)} ↗`);
+  if (v.onChainMatches === true) return check(true, "The root is on 0G Chain", link);
+  if (v.onChainMatches === false) return check(false, "The root on 0G Chain does not match", el("span", {}, v.chainRead === "missing" ? "SignalAnchor holds no root for this batch. " : "SignalAnchor holds a different root. ", link));
+  return check(null, "Unverified: 0G Chain could not be read just now", el("span", {}, "Try again, or check it yourself: ", link));
+}
+
+function settlementLines(v) {
+  const st = v.settlement || {}, en = st.entry || {}, ex = st.exit || {}, sig = v.signal;
+  const when = (t) => (t ? new Date(t).toLocaleString() : "?");
+  return el("ul", { class: "rules" },
+    en.price != null ? el("li", {}, el("b", {}, "Entry: "), `${fmtPrice(en.price)}, the average of ${en.bars ?? "?"} one-minute closes from ${String(en.source || "").split(":")[0] || "?"}, ${when(en.window?.[0])} to ${when(en.window?.[1])}`) : null,
+    ex.reason ? el("li", {}, el("b", {}, "Exit: "), `${ex.reason === "target" ? "target touched" : ex.reason === "stop" ? "stop touched" : "the horizon's last close"} at ${fmtPrice(sig.exitPrice)}, ${when(ex.at)}, ${String(ex.source || "").split(":")[0] || "?"} five-minute bars (${ex.observations?.rows?.length ?? "?"} kept)`) : null,
+    ex.costBps != null ? el("li", {}, el("b", {}, "Costs: "), `${ex.costBps} bps on entry and on exit`) : null,
+    el("li", {}, el("b", {}, "Result: "), `${fmtPctPoints(sig.resultPct)} on the paper position, ${fmtR(sig.r)} (R = result ÷ the stop distance)`),
+    ex.crossCheck ? el("li", {}, el("b", {}, "Cross-check: "), `${String(ex.crossCheck.source).split(":")[0]} closed ${fmtPrice(ex.crossCheck.close)} on the exit bar (${ex.crossCheck.divergencePct.toFixed(2)}% apart)`) : null);
 }

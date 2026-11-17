@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kult Dex proof</title>
+  <meta name="description" content="A Kult Dex call: what was decided, when it was committed on 0G Chain, and how it was settled. Checked in your browser.">
+  <link rel="icon" type="image/svg+xml" href="/art/kult-logo.svg">
+  <style>
+    :root { --bg: #0b0717; --panel: rgba(22, 15, 48, 0.92); --text: #f1edff; --muted: #c6bee8; --dim: #958bbf; --line: rgba(255, 255, 255, 0.12); --ok: #6ff0a6; --bad: #ff6b7d; --na: #ffc94d; --accent: #4fd8ff; --pink: #ff4fa3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 80% 0%, rgba(140, 60, 240, 0.25), transparent 55%), var(--bg); color: var(--text); font: 15px/1.5 Inter, system-ui, sans-serif; }
+    main { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; display: grid; gap: 16px; }
+    header { display: flex; align-items: center; gap: 12px; }
+    header img { width: 40px; height: 40px; }
+    header b { font: 700 13px "Chakra Petch", Inter, sans-serif; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+    h1 { margin: 4px 0 0; font: 700 26px "Chakra Petch", Inter, sans-serif; }
+    h2 { margin: 0 0 10px; font: 700 15px "Chakra Petch", Inter, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; min-width: 0; }
+    .sub { color: var(--dim); font-size: 13px; }
+    .label { display: inline-block; margin-top: 8px; padding: 4px 10px; border-radius: 999px; font-size: 12px; color: var(--na); border: 1px solid rgba(255, 201, 77, 0.4); background: rgba(255, 201, 77, 0.08); }
+    dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; }
+    dt { color: var(--dim); font-size: 13px; } dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+    code { font: 12px ui-monospace, Menlo, monospace; color: var(--muted); }
+    ul.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    ul.checks li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; }
+    .mark { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-weight: 700; }
+    li.ok .mark { background: rgba(111, 240, 166, 0.15); color: var(--ok); }
+    li.bad .mark { background: rgba(255, 107, 125, 0.15); color: var(--bad); }
+    li.na .mark { background: rgba(255, 201, 77, 0.12); color: var(--na); }
+    li .why { color: var(--dim); font-size: 13px; }
+    .reads { display: grid; gap: 8px; } .reads p { margin: 0; } .reads b { color: var(--accent); }
+    a { color: var(--accent); }
+    details pre { max-height: 360px; overflow: auto; background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 10px; font-size: 12px; }
+    .note { color: var(--dim); font-size: 13px; }
+    @media (max-width: 560px) { dl { grid-template-columns: 1fr; gap: 2px; } dt { margin-top: 6px; } }
+  </style>
+</head>
+<body>
+  <main id="app"><p class="sub">Loading the proof…</p></main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+  <script type="module" src="/js/proof.js"></script>
+</body>
+</html>

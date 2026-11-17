@@ -9,6 +9,7 @@
 //                        into an AI Arena token (then the game trades it for a
 //                        12-hour Dex session at /v1/dex/session).
 // - /config.json      -> public settings for the page (Privy app id, links).
+// - /proof/<id>       -> the public proof page for one call (no sign-in).
 
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
@@ -114,6 +115,8 @@ createServer(async (req, res) => {
       const q = new URLSearchParams(url.search); q.set("demo", DEMO);
       return send(res, 302, undefined, { Location: `/?${q}`, "Cache-Control": "no-store" });
     }
+    // A shareable, no-login proof page for one call (public/proof.html reads the id from the path).
+    if (/^\/proof\/[^/]+$/.test(p)) return await serveStatic(req, res, "/proof.html");
     return await serveStatic(req, res, p);
   } catch (e) {
     if (!res.headersSent) json(res, e.status || 500, { error: e.status ? e.message : "Something went wrong" });

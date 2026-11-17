@@ -566,7 +566,7 @@ const viewIs = (v) => state.view === v && state.inOffice;
 const navSel = (v) => `#sidebar [data-view="${v}"]`;
 const TOUR_LINES = {
   "f-hello": "Hi, I'm Nova, your KULT guide! Kult Dex is an AI trading desk: your AI Arena agent runs it, analysts read crypto and tokenized stocks, and real prices grade every call. Let's open yours.",
-  "f-name": "Name your desk. Pick something the leaderboard will remember: 3 to 32 letters.",
+  "f-name": "Name your desk. Pick something people will remember: 3 to 32 letters.",
   "f-ceo": "Now pick your CEO. Its archetype is its trading style: a Berserker trades momentum, a Defender loves T-bills.",
   "f-go": "That's it. Open the desk! You start with $10,000 of paper money: nothing real ever moves.",
   "o-hello": "Welcome to your trading floor! Analysts work at these desks, the ticker runs live prices, and your CEO makes the call on the chart rug.",
@@ -579,7 +579,7 @@ const TOUR_LINES = {
   "o-markets": "Live prices: crypto majors, tokenized US stocks that trade around the clock, gold, and the T-bill yield your desk can rotate into.",
   "o-signals": "Signals keeps every call. Once locked, a call is hashed and anchored on 0G: it can't be edited or deleted, losers included.",
   "o-verify": "Verify proves any call: the hash, the Merkle proof, the 0G anchor and the time it was made, before its entry price.",
-  "o-leaders": "Leaders: weekly, all-time and an RWA board. Only settled calls count, and calibration matters.",
+  "o-leaders": "Records: every desk's settled calls, paper R with its range, calibration and drawdown. Records, not a ranking.",
   "o-desk": "Desk: your mandate, the auto-desk switch, your CEO and the ledger.",
   "o-office-go": "Back to the floor.",
   "o-done": "You're set. Hire a desk, scan the board and lock your first call. Good trading, boss!"

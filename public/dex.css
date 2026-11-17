@@ -104,3 +104,9 @@ html.lang-zh body.is-demo::after { content: "演示 · 样本价格，没有任�
 
 /* The Kult logo in the HUD (was a text badge). */
 .logo.kult-mark, #hud .logo.kult-mark { display: block; padding: 0; border-radius: 50%; background: none !important; box-shadow: 0 6px 16px rgba(5, 0, 20, 0.45); object-fit: contain; }
+
+/* Verify and proof: rules, results in plain words, the paper label */
+.rules { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; line-height: 1.5; }
+.rules b { font-weight: 600; }
+.paper-label { margin: 8px 0 0; font-style: italic; }
+.lb.records td .muted.small { font-size: 11px; }
