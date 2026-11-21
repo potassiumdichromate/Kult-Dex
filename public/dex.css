@@ -110,3 +110,27 @@ html.lang-zh body.is-demo::after { content: "演示 · 样本价格，没有任�
 .rules b { font-weight: 600; }
 .paper-label { margin: 8px 0 0; font-style: italic; }
 .lb.records td .muted.small { font-size: 11px; }
+
+/* The points bubble (app.js pointsTip): what points are, on hover, focus or tap. */
+.hud-level { cursor: help; border-radius: 10px; outline-offset: 4px; }
+.pts-info { display: inline-grid; place-items: center; width: 15px; height: 15px; margin-left: 3px; border-radius: 50%; border: 1px solid currentColor; font: 700 10px/1 var(--display); color: var(--muted); vertical-align: 1px; }
+.hud-level:hover .pts-info, .hud-level:focus-visible .pts-info { color: var(--accent); }
+.points-tip { position: fixed; z-index: 2147482000; padding: 14px 16px 12px; border-radius: 16px; background: rgba(4, 22, 32, 0.98); border: 1px solid rgba(34, 211, 238, 0.35); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55); color: #e6f6fb; font: 13px/1.45 var(--body); animation: pt-in 0.16s ease; }
+@keyframes pt-in { from { opacity: 0; transform: translateY(-4px); } }
+.points-tip::before { content: ""; position: absolute; top: -7px; left: var(--arrow, 50%); width: 12px; height: 12px; transform: translateX(-50%) rotate(45deg); background: rgba(4, 22, 32, 0.98); border-left: 1px solid rgba(34, 211, 238, 0.35); border-top: 1px solid rgba(34, 211, 238, 0.35); }
+.points-tip .pt-title { display: block; margin-bottom: 4px; font: 700 14px var(--display); color: var(--accent); letter-spacing: 0.02em; }
+.points-tip p { margin: 0 0 8px; color: #c4dde6; }
+.pt-rules { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 5px; }
+.pt-rules li { display: grid; grid-template-columns: 18px 1fr; gap: 6px; align-items: start; color: #c4dde6; }
+.pt-rules i { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; font: 700 12px/1 var(--display); font-style: normal; }
+.pt-rules i.up { background: rgba(103, 232, 249, 0.16); color: #67e8f9; }
+.pt-rules i.down { background: rgba(255, 107, 125, 0.16); color: #ff8a98; }
+.pt-now { padding: 8px 10px; border-radius: 10px; background: rgba(34, 211, 238, 0.08); color: #e6f6fb !important; }
+.pt-now.neg { background: rgba(255, 107, 125, 0.1); }
+.pt-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+.pt-stats:empty { display: none; }
+.pt-stats div { padding: 6px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); }
+.pt-stats span { display: block; font-size: 10.5px; color: #8fb3bf; }
+.pt-stats b { font: 700 14px var(--display); }
+.pt-stats b.neg { color: #ff8a98; } .pt-stats b.pos { color: #67e8f9; }
+.points-tip small { display: block; font-size: 11.5px; color: #8fb3bf; }

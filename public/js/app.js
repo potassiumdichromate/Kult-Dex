@@ -262,6 +262,51 @@ $("found-form").addEventListener("submit", async (e) => {
 });
 $("no-agent-retry").addEventListener("click", async () => { try { enter(await api.me()); } catch (e) { toastError(e); } });
 
+// ------------------------------------------------------------------ the points bubble
+// Points can go below zero (a losing record scores below zero), so the pill
+// explains itself on hover, keyboard focus or tap: what points measure, and
+// why this desk's number is where it is.
+function pointsTip(d) {
+  const all = d.standings?.allTime || d.standings?.weekly, pts = Math.round(d.points * 10) / 10;
+  let now;
+  if (!all?.settled) now = [el("span", {}, "No call has settled yet. Points start when your first call settles against real prices.")];
+  else if (pts < 0) now = [el("span", {}, "Your score is below zero because your settled calls have lost more than they won so far. Winning calls bring it back up.")];
+  else if (d.nextLevelAt) now = [el("span", {}, "Next level at"), " ", el("b", {}, String(d.nextLevelAt)), " ", el("span", {}, "pts"), "."];
+  else now = [el("span", {}, "Top level reached. Points keep counting for your record.")];
+  $("pt-now").className = `pt-now ${pts < 0 ? "neg" : ""}`;
+  $("pt-now").replaceChildren(...now);
+  const stat = (label, value, cls = "") => el("div", {}, el("span", {}, label), el("b", { class: cls }, value));
+  $("pt-stats").replaceChildren(...(all?.settled ? [
+    stat("Settled calls", String(all.settled)),
+    stat("Average R", `${all.avgR >= 0 ? "+" : ""}${Number(all.avgR).toFixed(2)}R`, all.avgR < 0 ? "neg" : "pos"),
+    stat("Biggest drop", `${Math.round(Number(all.maxDrawdown) * 100)}%`, all.maxDrawdown > 0.15 ? "neg" : ""),
+  ] : []));
+}
+(function wirePointsTip() {
+  const box = $("hud-level-box"), tip = $("points-tip");
+  if (!box || !tip) return;
+  document.body.append(tip); // above every panel, not clipped by the HUD
+  let pinned = false;
+  const place = () => {
+    const r = box.getBoundingClientRect(), w = Math.min(320, innerWidth - 16);
+    tip.style.width = `${w}px`;
+    tip.style.left = `${Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2))}px`;
+    tip.style.top = `${r.bottom + 10}px`;
+    tip.style.setProperty("--arrow", `${Math.max(16, Math.min(w - 16, r.left + r.width / 2 - parseFloat(tip.style.left)))}px`);
+  };
+  const show = () => { place(); tip.hidden = false; };
+  const hide = () => { if (!pinned) tip.hidden = true; };
+  box.addEventListener("mouseenter", show);
+  box.addEventListener("mouseleave", hide);
+  box.addEventListener("focus", show);
+  box.addEventListener("blur", () => { pinned = false; tip.hidden = true; });
+  // A tap (phones) or a click pins it open; tapping again or anywhere else closes it.
+  box.addEventListener("click", (e) => { e.stopPropagation(); pinned = !pinned || tip.hidden; pinned ? show() : (tip.hidden = true); });
+  box.addEventListener("keydown", (e) => { if (e.key === "Escape") { pinned = false; tip.hidden = true; } });
+  document.addEventListener("click", (e) => { if (!tip.hidden && !tip.contains(e.target)) { pinned = false; tip.hidden = true; } });
+  addEventListener("resize", () => { if (!tip.hidden) place(); });
+})();
+
 // ------------------------------------------------------------------ desk state
 function applyDesk(d) {
   const prev = state.desk;
@@ -275,6 +320,7 @@ function applyDesk(d) {
   $("hud-points").textContent = fmtPts(Math.round(d.points * 10) / 10);
   const prevAt = [0, 50, 150, 300, 500][d.level - 1] ?? 0;
   $("hud-level-bar").style.width = `${d.nextLevelAt ? Math.max(0, Math.min(100, ((d.points - prevAt) / (d.nextLevelAt - prevAt)) * 100)) : 100}%`;
+  pointsTip(d);
   const credits = $("credits");
   credits.textContent = fmtCredits(d.credits);
   if (prev && prev.credits !== d.credits) { credits.parentElement.classList.remove("bump"); void credits.offsetWidth; credits.parentElement.classList.add("bump"); }

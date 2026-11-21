@@ -32,9 +32,22 @@
           <div id="agency-sub" class="muted small"></div>
         </div>
       </div>
-      <div class="hud-level" title="Desk level: more desks at every level">
-        <div class="k">Level <b id="hud-level">1</b> · <span id="hud-points" class="hud-points">0</span> pts</div>
+      <div class="hud-level" id="hud-level-box" tabindex="0" role="button" aria-describedby="points-tip" aria-label="Level and points: what they mean">
+        <div class="k">Level <b id="hud-level">1</b> · <span id="hud-points" class="hud-points">0</span> pts <span class="pts-info" aria-hidden="true">i</span></div>
         <div class="bar"><i id="hud-level-bar" style="--c:var(--accent);width:0%"></i></div>
+      </div>
+      <!-- What points are, shown on hover, focus or tap (app.js pointsTip). -->
+      <div id="points-tip" class="points-tip" role="tooltip" hidden>
+        <b class="pt-title">What are points?</b>
+        <p>Points score how your settled calls did against real prices. They are not credits and not money.</p>
+        <ul class="pt-rules">
+          <li><i class="up">+</i><span>A winning call adds points. A losing call takes them away.</span></li>
+          <li><i class="down">−</i><span>A drop of more than 15% in your paper bankroll costs points.</span></li>
+          <li><i class="down">−</i><span>Being sure and wrong costs points. Being honestly unsure doesn't.</span></li>
+        </ul>
+        <p id="pt-now" class="pt-now"></p>
+        <div id="pt-stats" class="pt-stats"></div>
+        <small>Your level never goes down, and points never cost you credits.</small>
       </div>
       <div class="badges">
         <span id="bankroll" class="badge" title="Paper bankroll: never real money"></span>
