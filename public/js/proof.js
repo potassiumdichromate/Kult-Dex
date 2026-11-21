@@ -82,7 +82,8 @@ async function main() {
     el("div", { class: "card" },
       el("h1", {}, `${dirWord} · ${s.horizon}`),
       el("div", { class: "sub" }, `Call ${s.id} · ${s.status === "SETTLED" ? `settled ${s.r >= 0 ? "+" : ""}${Number(s.r).toFixed(2)}R` : s.status === "VOID" ? "void" : s.status.toLowerCase()}`),
-      el("span", { class: "label" }, PAPER)),
+      el("span", { class: "label" }, PAPER),
+      el("div", { id: "share", style: "margin-top:12px" })),
     el("section", { class: "card" }, el("h2", {}, "Checked in your browser"), checks),
     el("section", { class: "card" }, el("h2", {}, "The decision"),
       el("dl", {},
@@ -113,6 +114,8 @@ async function main() {
     st.entry ? el("details", { class: "card" }, el("summary", {}, "The settlement record, with every price used"), el("pre", {}, JSON.stringify(st, null, 2))) : null,
     v.proof ? el("details", { class: "card" }, el("summary", {}, "Merkle proof"), el("pre", {}, JSON.stringify({ leaf: v.leafHash, proof: v.proof, root: v.batch?.root }, null, 2))) : null,
     el("p", { class: "note" }, "This page proves what this desk committed for this call, and when. The owner chose to share it; it says nothing about whether the desk's other calls exist or were all shared.")].filter(Boolean));
+  window.KultShare?.row(document.getElementById("share"), { url: location.href, title: `${dirWord} · ${s.horizon}`, text: `A call on Kult Dex: ${dirWord} · ${s.horizon}. Committed before entry and anchored on 0G Chain. Check it yourself:`, theme: window.KultShare.NIGHT });
+  document.title = `${dirWord} · ${s.horizon} · Kult Dex proof`;
   if (!E) checks.replaceChildren(check(null, "Unverified: the checking library did not load", "Reload the page."));
   else runChecks().catch((e) => checks.replaceChildren(check(null, "Unverified", e.message)));
 }

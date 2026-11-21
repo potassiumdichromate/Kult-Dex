@@ -170,7 +170,8 @@ function timeline(s, ctx) {
           : s.status === "VOID" ? s.voidReason : s.endsAt ? el("span", {}, "Horizon ends in ", el("span", { "data-until": s.endsAt }, fmtCountdown(Date.parse(s.endsAt) - now))) : null, s.status === "OPEN")),
     s.status === "SETTLED" ? el("p", { class: "muted small paper-label" }, "Simulated paper performance, not executable profit.") : null,
     el("div", { class: "actions" }, el("button", { type: "button", class: "btn", onclick: () => ctx.verify(s.id) }, lineIcon("verify", "inline-ico"), "Verify this call"),
-      s.leafHash ? el("a", { class: "btn ghost", href: `/proof/${encodeURIComponent(s.id)}`, target: "_blank", rel: "noopener" }, "Public proof page ↗") : null));
+      s.leafHash ? el("a", { class: "btn ghost", href: `/proof/${encodeURIComponent(s.id)}`, target: "_blank", rel: "noopener" }, "Public proof page ↗") : null,
+      s.leafHash ? el("button", { type: "button", class: "btn ghost", onclick: () => ctx.shareCall(s) }, "Share call") : null));
 }
 
 // ---------------------------------------------------------------- markets
@@ -293,7 +294,8 @@ export function renderVerify(root, ctx) {
           check(v.chainValid ?? null, "Chained to the desk's other calls", el("span", {}, v.chain.prev ? el("a", { href: "#", onclick: (e) => { e.preventDefault(); ctx.verify(v.chain.prev.id); } }, "‹ previous") : "the desk's first call", " · ", v.chain.next ? el("a", { href: "#", onclick: (e) => { e.preventDefault(); ctx.verify(v.chain.next.id); } }, "next ›") : "latest call"))),
         el("div", { class: "actions" },
           el("a", { class: "btn", href: `/proof/${encodeURIComponent(v.signal.id)}`, target: "_blank", rel: "noopener" }, "Public proof page ↗"),
-          el("button", { type: "button", class: "btn ghost", onclick: async (e) => { try { await navigator.clipboard.writeText(`${location.origin}/proof/${encodeURIComponent(v.signal.id)}`); e.currentTarget.textContent = "Link copied"; } catch { /* no clipboard */ } } }, "Copy proof link"))),
+          el("button", { type: "button", class: "btn ghost", onclick: async (e) => { try { await navigator.clipboard.writeText(`${location.origin}/proof/${encodeURIComponent(v.signal.id)}`); e.currentTarget.textContent = "Link copied"; } catch { /* no clipboard */ } } }, "Copy proof link"),
+          el("button", { type: "button", class: "btn ghost", onclick: () => ctx.shareCall(v.signal) }, "Share call"))),
       v.signal.status === "VOID" ? el("div", { class: "card" }, el("h3", {}, "Void", el("small", {}, "no paper result")), el("p", {}, v.signal.voidReason || "Void"), el("p", { class: "muted small" }, "A void is logged in the desk's history. It has no P&L and does not count as a win or a loss.")) : null,
       v.policy ? el("div", { class: "card" }, el("h3", {}, "Rules it was locked with", el("small", {}, v.policy.version)),
         el("ul", { class: "rules" },

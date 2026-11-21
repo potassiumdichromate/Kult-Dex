@@ -30,7 +30,22 @@ if (params.has("debug")) window.kd = { office, state };
 const ROLE_TITLE = { FLOW: "Flow Hunter", CHART: "Chart Reader", RISK: "Risk Officer", MACRO_RWA: "Macro & RWA Strategist", SENTIMENT: "Sentiment Scout", YIELD: "Yield Analyst", EXECUTION: "Execution Desk" };
 
 // ------------------------------------------------------------------ shared context for views
+// A locked call has a public proof page (/proof/<id>) anyone can open.
+function shareCall(sig) {
+  if (!sig?.id) return;
+  const what = sig.kind === "no-trade" ? `no trade on ${sig.asset.symbol}` : sig.kind === "rotation" ? `a rotation out of ${sig.asset.symbol}` : `${String(DIR_LABEL[sig.direction] || sig.direction).toLowerCase()} ${sig.asset.symbol} for ${sig.horizon}`;
+  window.KultShare?.open({
+    url: new URL(`/proof/${encodeURIComponent(sig.id)}`, location.origin).href,
+    heading: "Call locked. Share it",
+    title: `${sig.asset.symbol} · ${sig.horizon}`,
+    text: `I locked a call on Kult Dex: ${what}. Committed before entry and anchored on 0G Chain. Check it yourself:`,
+    note: "The proof page shows the call, when it was committed and how it settles. Anyone can check it without signing in.",
+    theme: window.KultShare.NIGHT,
+  });
+}
+
 const ctx = {
+  shareCall: (s) => shareCall(s),
   state,
   go: (v) => setView(v),
   openSignal: (id) => openSignal(id),
@@ -432,6 +447,7 @@ async function lockSignal(id, btn, draft) {
     office.celebrate(2.5);
     say("ceo", "Committed. No take-backs now.", 3000);
     toast("Locked and committed.");
+    shareCall(sig);
     V.renderConsole($("console"), ctx);
     if (state.view === "signal") renderView("signal");
     api.desk().then(applyDesk).catch(() => {});
